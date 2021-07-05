@@ -37,7 +37,7 @@ class EditProfileAdminForm(FlaskForm):
       
 class SelectForm(FlaskForm):
 
-    state = SelectField('State', choices=[('None', 'India'), 
+    state = SelectField('State', choices=[('tt', 'India'), 
                                          ('an', 'Andaman and Nicobar Islands'),
                                          ('ap', 'Andhra Pradesh'),
                                          ('ar', 'Arunachal Pradesh'),

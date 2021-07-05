@@ -67,6 +67,26 @@ class Role(db.Model):
     def has_permission(self, perm):
         return self.permissions & perm == perm
         
+class Covid(db.Model):
+    __tablename__ = 'covid'
+    id = db.Column(db.Integer, primary_key=True)
+    state = db.Column(db.String(64))
+    state_code = db.Column(db.String(64))
+    confirmed = db.Column(db.String(64))
+    active = db.Column(db.String(64))
+    recovered = db.Column(db.String(64))
+    deaths = db.Column(db.String(64))
+    deltaconfirmed = db.Column(db.String(64))
+    deltarecovered = db.Column(db.String(64))
+    deltadeaths = db.Column(db.String(64))
+    timeseries = db.relationship('Timeseries', backref='covid', lazy='dynamic')
+
+class Timeseries(db.Model):
+    __tablename__ = 'timeseries'
+    id = db.Column(db.Integer, primary_key=True)
+    newcases = db.Column(db.String(64))
+    date = db.Column(db.String(64))
+    covid_id = db.Column(db.Integer, db.ForeignKey('covid.id'))
 
 class User(UserMixin, db.Model):
     __tablename__ = 'users'

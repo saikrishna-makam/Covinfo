@@ -1,70 +1,107 @@
 import requests
 import json
-import pandas as pd
 import itertools
 from datetime import datetime
-from flask import render_template, request, jsonify, session, redirect, url_for, flash
+from flask import render_template, make_response, request, jsonify, session, redirect, url_for, flash
 from flask_login import login_required, current_user
 from . import main
 from .forms import EditProfileForm, EditProfileAdminForm, SelectForm
 from .. import db
-from ..models import User, Role, Permission
+from ..models import User, Role, Covid, Timeseries, Permission
 from ..decorators import admin_required, permission_required
 
+def fetch_api():
+    states = ['an', 'ap', 'ar', 'as', 'br', 'ch', 'ct', 'dd', 'dl', 'dn', 'ga', 'gj', 'hp', 'hr', 'jh', 'jk', 'ka', 'kl', 
+              'la', 'ld', 'mh', 'ml', 'mn', 'mp', 'mz', 'nl', 'or', 'pb', 'py', 'rj', 'sk', 'tg', 'tn', 'up', 'ut', 'wb']
+
+    endpoint1 = "https://api.covid19india.org/data.json"
+    endpoint2 = "https://api.covid19india.org/states_daily.json"
+    
+    try:
+        response1 = requests.get(endpoint1)
+        response2 = requests.get(endpoint2)
+    except requests.ConnectionError:
+        return "Connection Error"
+    response_text1 = response1.text
+    response_text2 = response2.text
+    data1 = json.loads(response_text1)
+    data2 = json.loads(response_text2)['states_daily']
+
+    statewise_data = data1['statewise']
+    timeseries_data = data1["cases_time_series"]
+    for state in statewise_data:
+        if state['statecode'].lower() == 'tt':
+            covid = Covid(state=state['state'], confirmed=state['confirmed'], 
+                          active=state['active'], recovered=state['recovered'], 
+                          deaths=state['deaths'], deltaconfirmed=timeseries_data[len(timeseries_data) - 1]['dailyconfirmed'], 
+                          deltarecovered=timeseries_data[len(timeseries_data) - 1]['dailyrecovered'], deltadeaths=timeseries_data[len(timeseries_data) - 1]['dailydeceased'],
+                          state_code=state['statecode'].lower())
+        else:
+            covid = Covid(state=state['state'], confirmed=state['confirmed'], 
+                          active=state['active'], recovered=state['recovered'], 
+                          deaths=state['deaths'], deltaconfirmed=data2[len(data2) - 3][state['statecode'].lower()], 
+                          deltarecovered=data2[len(data2) - 2][state['statecode'].lower()], deltadeaths=data2[len(data2) - 1][state['statecode'].lower()],
+                          state_code=state['statecode'].lower())
+        db.session.add(covid)
+    covid = Covid(state='Daman and Diu', confirmed='0', 
+                      active='0', recovered='0', 
+                      deaths='0', deltaconfirmed='0', 
+                      deltarecovered='0', deltadeaths='0',
+                      state_code='dd')
+    db.session.add(covid)
+    db.session.commit()
+    
+    covid_india = Covid.query.filter_by(state='Total').first()
+    for item in timeseries_data:
+        timeseries = Timeseries(newcases=item['dailyconfirmed'], date=item['date'], covid=covid_india)
+        db.session.add(timeseries)
+    db.session.commit()
+    
+    for state_code in states:
+        covid_state = Covid.query.filter_by(state_code=state_code).first()
+        for i in range(0, len(data2)):
+            if i % 3 == 0:
+                timeseries = Timeseries(newcases=data2[i][state_code], date=data2[i]["date"], covid=covid_state)
+                db.session.add(timeseries)
+    db.session.commit()
+
+@main.route('/set_cookie', methods=['GET'])
+def set_cookie():
+    response = make_response(redirect(url_for('.index')))
+    response.set_cookie('api_called', 'True')
+    return response
 
 @main.route('/get_data/<state_code>', methods=['GET'])
 def get_data(state_code):
-    selectValue = state_code
-    endpoint = "https://api.covid19india.org/states_daily.json"
-    try:
-        response = requests.get(endpoint)
-    except requests.ConnectionError:
-        return "Connection Error"
-    response_text = response.text
-    data = json.loads(response_text)['states_daily']
-    print("Hey : " + selectValue)
-    values = [data[i][selectValue] for i in range(0, len(data)) if i % 3 == 0]
-    labels = [data[i]["date"] for i in range(0, len(data)) if i % 3 == 0]
-        
+    timeseries_data = Covid.query.filter_by(state_code=state_code).first().timeseries
+    values = [perday_data.newcases for perday_data in timeseries_data]
+    labels = [perday_data.date for perday_data in timeseries_data]
     return jsonify({'payload':json.dumps({'values':values, 'labels':labels})})
-
+    
 @main.route('/', methods=['GET', 'POST'])
-def index(): 
-    endpoint = "https://api.covid19india.org/data.json"
+def index():
+    if not request.cookies.get('api_called'):
+        db.session.query(Covid).delete()
+        db.session.query(Timeseries).delete()
+        db.session.commit()
+        fetch_api()
+        return redirect(url_for('.set_cookie'))       
     form = SelectForm()
-    print(request.json)
-    print()
-    try:
-        response = requests.get(endpoint)
-    except requests.ConnectionError:
-        return "Connection Error"
-    response_text = response.text
-    data = json.loads(response_text)
-    df = pd.read_json(json.dumps(data['statewise']))
-    data_total = df.iloc[0]
-    legend = 'Monthly Data'
-    if request.json != None:
-        selectValue = request.json['state_code']
+    daily_data = Covid.query.all()
+    data_total = daily_data[0]    
+    if not current_user.is_authenticated:
+        return render_template('anonymous_user_index.html', data_total = data_total)
     else:
         selectValue = None
-    if selectValue == None or selectValue == "None":
-        timeseries_data = data['cases_time_series']
-        values = [item['dailyconfirmed'] for item in timeseries_data]
-        labels = [item['date'] for item in timeseries_data]
-    else:
-        endpoint = "https://api.covid19india.org/states_daily.json"
-        try:
-            response = requests.get(endpoint)
-        except requests.ConnectionError:
-            return "Connection Error"
-        response_text = response.text
-        data = json.loads(response_text)['states_daily']
-        print("Hey : " + selectValue)
-        values = [data[i][selectValue] for i in range(0, len(data)) if i % 3 == 0]
-        labels = [data[i]["date"] for i in range(0, len(data)) if i % 3 == 0]  
-        return redirect(url_for('main.get_data', state_code=selectValue))          
-    return render_template('index.html', data_total = data_total, data=df, values=values, labels=labels, form=form)    
-    
+        if request.json != None:
+            selectValue = request.json['state_code']            
+        if selectValue == None:
+            timeseries_data = Covid.query.filter_by(state_code='tt').first().timeseries
+            values = [perday_data.newcases for perday_data in timeseries_data]
+            labels = [perday_data.date for perday_data in timeseries_data]
+        else:
+            return redirect(url_for('main.get_data', state_code=selectValue))
+    return render_template('index.html', data_total = data_total, data=daily_data, values=values, labels=labels, form=form)
     
 @main.route('/submit-form', methods = ['POST'])
 def submitForm():

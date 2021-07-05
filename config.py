@@ -3,6 +3,7 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 
 
 class Config:
+    START_NGROK = os.environ.get('START_NGROK') is not None
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'hard to guess string'
     MAIL_SERVER = os.environ.get('MAIL_SERVER', 'smtp.googlemail.com')
     MAIL_PORT = int(os.environ.get('MAIL_PORT', '587'))
@@ -31,13 +32,11 @@ class TestingConfig(Config):
     
     
 class ProductionConfig(Config):
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'sqlite:///' + os.path.join(basedir, 'data.sqlite')
-       
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'sqlite:///' + os.path.join(basedir, 'data.sqlite')    
 
 config = {
     'development' : DevelopmentConfig,
     'testing' : TestingConfig,
-    'production' : ProductionConfig,
-    
+    'production' : ProductionConfig,  
     'default' : DevelopmentConfig
 }

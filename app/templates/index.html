@@ -4,75 +4,70 @@
 <script src='static/Chart.min.js'></script>
 {% endblock %}
 {% block page_content %}
-    <div class="page-header">
-        <h2 id="bold-text">COVID-19 Statistics</h2>    
-    </div>
-    <h4 id="bold-text" class="covid-info-label-margin">Cases Across India</h4>
-    <div class="row my-4">
-        <div class="col-12 col-md-6 col-lg-3 mb-4 mb-lg-0">
-          <div class="card">
-              <h5 class="card-header">Total Cases</h5>
-              <div class="card-body">
-                <p class="card-text">{{ data_total['confirmed'] }}</p>
-                <p class="card-text text-success">{{ data_total['deltaconfirmed'] }}</p>
-              </div>
-            </div>
-        </div>
-        <div class="col-12 col-md-6 mb-4 mb-lg-0 col-lg-3">
-          <div class="card">
-              <h5 class="card-header">Active Cases</h5>
-              <div class="card-body">
-                <p class="card-text">{{ data_total['active'] }}</p>
-                <p class="card-text text-danger">0</p>
-              </div>
-            </div>
-        </div>
-        <div class="col-12 col-md-6 mb-4 mb-lg-0 col-lg-3">
-          <div class="card">
-              <h5 class="card-header">Recovered Cases</h5>
-              <div class="card-body">
-                <p class="card-text">{{ data_total['recovered'] }}</p>
-                <p class="card-text text-success">{{ data_total['deltarecovered'] }}</p>
-              </div>
-            </div>
-        </div>
-        <div class="col-12 col-md-6 mb-4 mb-lg-0 col-lg-3">
-          <div class="card">
-              <h5 class="card-header">Deaths</h5>
-              <div class="card-body">
-                <p class="card-text">{{ data_total['deaths'] }}</p>
-                <p class="card-text text-success">{{ data_total['deltadeaths'] }}</p>
-              </div>
-            </div>
+<div class="page-header">
+    <h2 id="bold-text">COVID-19 Statistics</h2>    
+</div>
+<h4 id="bold-text" class="covid-info-label-margin">Cases Across India</h4>
+<div class="row my-4">
+    <div class="text-center col-12 col-md-6 col-lg-3 mb-4 mb-lg-0">
+      <div class="card">
+          <h5 class="card-header bold-text">Confirmed</h5>
+          <div class="card-body confirmed-card">
+            <p class="card-text">{{ data_total['confirmed'] }}</p>
+            <p class="card-text text-alpha">+{{ data_total['deltaconfirmed'] }}</p>
+          </div>
         </div>
     </div>
-    
-    <h4 id="covid-info-label" class="covid-info-label-margin">COVID-19 Statewise Status</h4>
-    <table class="table table-striped table-bordered table-condensed">
+    <div class="text-center col-12 col-md-6 mb-4 mb-lg-0 col-lg-3">
+      <div class="card">
+          <h5 class="card-header bold-text">Active Cases</h5>
+          <div class="card-body active-card">
+            <p class="card-text">{{ data_total['active'] }}</p>
+            <p class="card-text text-alpha white-text">+{{ data_total['deltadeaths'] }}</p>
+          </div>
+        </div>
+    </div>
+    <div class="text-center col-12 col-md-6 mb-4 mb-lg-0 col-lg-3">
+      <div class="card">
+          <h5 class="card-header bold-text">Recovered Cases</h5>
+          <div class="card-body recovered-card">
+            <p class="card-text">{{ data_total['recovered'] }}</p>
+            <p class="card-text text-alpha">+{{ data_total['deltarecovered'] }}</p>
+          </div>
+        </div>
+    </div>
+    <div class="text-center col-12 col-md-6 mb-4 mb-lg-0 col-lg-3">
+      <div class="card">
+          <h5 class="card-header bold-text">Deaths</h5>
+          <div class="card-body death-card">
+            <p class="card-text">{{ data_total['deaths'] }}</p>
+            <p class="card-text text-alpha">+{{ data_total['deltadeaths'] }}</p>
+          </div>
+        </div>
+    </div>
+</div>
+
+<h4 id="covid-info-label" class="covid-info-label-margin">COVID-19 Statewise Status</h4>
+<table class="table table-striped table-bordered table-condensed">
     <thead>
         <tr>
             <th scope="col">State</th>
-            <th scope="col">Total Cases</th>
+            <th scope="col">Confirmed</th>
             <th scope="col">Active</th>
             <th scope="col">Recovered</th>
             <th scope="col">Deaths</th>
-            <th scope="col">Delta Total Cases</th>
-            <th scope="col">Delta Recovered</th>
-            <th scope="col">Delta Deaths</th>
         </tr>
     </thead>
     <tbody>
-            {% for key, value in data.iterrows() %}
-            {% if key != 0 %}
+            {% set exclude_states = ['tt', 'un', 'dd'] %}
+            {% for state_data in data %}
+            {% if state_data.state_code not in exclude_states %}
             <tr>
-                <td scope="row">{{ value['state'] }}</td>
-                <td scope="row">{{ value['confirmed'] }}</td>
-                <td scope="row">{{ value['active'] }}</td>
-                <td scope="row">{{ value['recovered'] }}</td>
-                <td scope="row">{{ value['deaths'] }}</td>
-                <td scope="row">{{ value['deltaconfirmed'] }}</td>
-                <td scope="row">{{ value['deltarecovered'] }}</td>
-                <td scope="row">{{ value['deltadeaths'] }}</td>
+                <td scope="row">{{ state_data.state }}</td>
+                <td scope="row">{{ state_data.confirmed }}<sub class="confirmed-card">{{ state_data.deltaconfirmed }}&#8593;</sub></td>
+                <td scope="row">{{ state_data.active }}</td>
+                <td scope="row">{{ state_data.recovered }}<sub class="recovered-card">{{ state_data.deltarecovered }}&#8593;</sub></td>
+                <td scope="row">{{ state_data.deaths }}<sub class="death-card">{{ state_data.deltadeaths }}&#8593;</sub></td>
             </tr>
             {% endif %}
             {% endfor %}
@@ -88,7 +83,6 @@
 <canvas id="myChart" width="600" height="400"></canvas>
 </center>
 <script>
-
 Chart.pluginService.register({
 	beforeDraw: function (chart, easing) {
 		if (chart.config.options.chartArea && chart.config.options.chartArea.backgroundColor) {

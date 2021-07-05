@@ -6,18 +6,25 @@
     margin-left: 280px;
 }
 
-table {
-    table-layout: responsive-sm;
+table, th, td {
+  border-radius: 5px;
+  border-collapse: separate;
+  border-spacing: 0 5px;
+  text-align: center;
 }
 
+
 thead th {
-    background-color: #FFA500;
+    height: 40px;
+    background-color: rgb(86, 101, 115);
     color: white;
 }
 
 td {
+    padding: 0px 10px;
     white-space: normal !important;
     word-wrap: break-word;
+    width: 150px;
 }
 
 .fixed-button-size {
@@ -31,6 +38,49 @@ td {
     border-radius: 3px;
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
     padding-left: 10px;
+    font-size: 18px;
+    font-weight: 600;
+    color: rgba(52,52,52, 0.8);
+}
+
+.confirmed-card {
+    color: rgb(255, 0, 0)
+}
+
+.active-card {
+    color: rgb(211, 84, 0)
+}
+
+.recovered-card {
+    color: rgb(0, 180, 0)
+}
+
+.death-card {
+    color: rgb(0, 0, 255)
+}
+
+.text-alpha {
+    font-size: 15px;
+    opacity: 0.6;
+}
+
+.white-text {
+    color: white;
+}
+
+.bold-text {
+    font-weight: 600;
+}
+
+tr {
+    height: 40px;
+    font-size: 15px;
+    font-weight: 600; 
+}
+
+sub {
+    font-size: 15px;
+    opacity: 0.6; 
 }
 
 #covid-info-label {
@@ -64,3 +114,13 @@ td {
   margin-top: 30px;
 }
 
+#features-locked-message {
+    font-size: 15px;
+    color: white;
+    background: rgb(119, 136, 153);
+    padding: 3px 5px;
+    margin: -3px -5px;
+    margin-top: 20px;
+    line-height: 1.7;
+    border-radius: 3px;
+}

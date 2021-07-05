@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block page_content %}
+    <div class="page-header">
+        <h2 id="bold-text">COVID-19 Statistics</h2>    
+    </div>
+    <h4 id="bold-text" class="covid-info-label-margin">Cases Across India</h4>
+    <div class="row my-4">
+        <div class="col-12 col-md-6 col-lg-3 mb-4 mb-lg-0">
+          <div class="card">
+              <h5 class="card-header">Total Cases</h5>
+              <div class="card-body">
+                <p class="card-text">{{ data_total['confirmed'] }}</p>
+                <p class="card-text text-success">{{ data_total['deltaconfirmed'] }}</p>
+              </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-6 mb-4 mb-lg-0 col-lg-3">
+          <div class="card">
+              <h5 class="card-header">Active Cases</h5>
+              <div class="card-body">
+                <p class="card-text">{{ data_total['active'] }}</p>
+                <p class="card-text text-danger">0</p>
+              </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-6 mb-4 mb-lg-0 col-lg-3">
+          <div class="card">
+              <h5 class="card-header">Recovered Cases</h5>
+              <div class="card-body">
+                <p class="card-text">{{ data_total['recovered'] }}</p>
+                <p class="card-text text-success">{{ data_total['deltarecovered'] }}</p>
+              </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-6 mb-4 mb-lg-0 col-lg-3">
+          <div class="card">
+              <h5 class="card-header">Deaths</h5>
+              <div class="card-body">
+                <p class="card-text">{{ data_total['deaths'] }}</p>
+                <p class="card-text text-success">{{ data_total['deltadeaths'] }}</p>
+              </div>
+            </div>
+        </div>
+    </div>
+    <p id="features-locked-message">Log In to unlock more features of application. 
+    </p>
+{% endblock %}
