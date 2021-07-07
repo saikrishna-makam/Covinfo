@@ -1,6 +1,6 @@
 import os
 import click
-from flask_migrate import Migrate
+from flask_migrate import Migrate, upgrade
 from flask_ngrok import run_with_ngrok
 from app import create_app, db
 from app.models import User, Role
@@ -33,3 +33,8 @@ def test(test_names):
     else:
         tests = unittest.TestLoader().discover('tests')
     unittest.TextTestRunner(verbosity=2).run(tests)
+    
+@app.cli.command()
+def deploy():
+    upgrade()
+    Role.insert_roles()

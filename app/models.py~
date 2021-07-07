@@ -71,6 +71,7 @@ class Covid(db.Model):
     __tablename__ = 'covid'
     id = db.Column(db.Integer, primary_key=True)
     state = db.Column(db.String(64))
+    state_code = db.Column(db.String(64))
     confirmed = db.Column(db.String(64))
     active = db.Column(db.String(64))
     recovered = db.Column(db.String(64))
