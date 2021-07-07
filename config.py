@@ -55,7 +55,7 @@ class ProductionConfig(Config):
             credentials=credentials,
             secure=secure)
         mail_handler.setLevel(logging.ERROR)
-        app.handler.addHandler(mail_handler)
+        app.logger.addHandler(mail_handler)
 
 class HerokuConfig(ProductionConfig):
     SSL_REDIRECT = True if os.environ.get('DYNO') else False    
@@ -68,7 +68,7 @@ class HerokuConfig(ProductionConfig):
         from logging import StreamHandler
         file_handler = StreamHandler()
         file_handler.setLevel(logging.INFO)
-        app.handler.addHandler(file_handler)
+        app.logger.addHandler(file_handler)
         from werkzeug.contrib.fixers import ProxyFix
         app.wsgi_app = ProxyFix(app.wsgi_app)
                   
