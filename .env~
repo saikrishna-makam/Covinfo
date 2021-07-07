@@ -2,4 +2,5 @@ export FLASK_APP=covid
 export FLASK_CONFIG=heroku
 export MAIL_USERNAME=saikrisnamakam43770@gmail.com
 export MAIL_PASSWORD=becooled
+export MAIL_USE_TLS=true
 export COVID_ADMIN=saikrishnaamakam@gmail.com
