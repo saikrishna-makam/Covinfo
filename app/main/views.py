@@ -52,11 +52,13 @@ def fetch_api():
     db.session.commit()
     
     covid_india = Covid.query.filter_by(state='Total').first()
+    timeseries_data = timeseries_data[-250:]
     for item in timeseries_data:
         timeseries = Timeseries(newcases=item['dailyconfirmed'], date=item['date'], covid=covid_india)
         db.session.add(timeseries)
     db.session.commit()
     
+    data2 = data2[-750:]
     for state_code in states:
         covid_state = Covid.query.filter_by(state_code=state_code).first()
         for i in range(0, len(data2)):
