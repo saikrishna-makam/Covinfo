@@ -66,7 +66,7 @@ def fetch_api():
                 timeseries = Timeseries(newcases=data2[i][state_code], date=data2[i]["date"], covid=covid_state)
                 db.session.add(timeseries)
     db.session.commit()
-    current_app.logger.info('fetch_api called' + Covid.query.filter_by(state='Total').first())
+    current_app.logger.info('fetch_api called' + str(Covid.query.filter_by(state='Total').first()))
 
 @main.route('/set_cookie', methods=['GET'])
 def set_cookie():
@@ -85,8 +85,8 @@ def get_data(state_code):
 def index():
     current_app.logger.info('index called')
     if not request.cookies.get('api_called'):
-        db.session.query(Covid).delete()
         db.session.query(Timeseries).delete()
+        db.session.query(Covid).delete()
         db.session.commit()
         fetch_api()
         return redirect(url_for('.set_cookie'))       
