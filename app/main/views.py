@@ -2,7 +2,7 @@ import requests
 import json
 import itertools
 from datetime import datetime
-from flask import render_template, make_response, request, jsonify, session, redirect, url_for, flash
+from flask import render_template, make_response, request, jsonify, session, redirect, url_for, flash, current_app
 from flask_login import login_required, current_user
 from . import main
 from .forms import EditProfileForm, EditProfileAdminForm, SelectForm
@@ -16,7 +16,7 @@ def fetch_api():
 
     endpoint1 = "https://api.covid19india.org/data.json"
     endpoint2 = "https://api.covid19india.org/states_daily.json"
-    
+    current_app.logger.info('fetch_api called')
     try:
         response1 = requests.get(endpoint1)
         response2 = requests.get(endpoint2)
@@ -66,6 +66,7 @@ def fetch_api():
                 timeseries = Timeseries(newcases=data2[i][state_code], date=data2[i]["date"], covid=covid_state)
                 db.session.add(timeseries)
     db.session.commit()
+    current_app.logger.info('fetch_api called' + Covid.query.filter_by(state='Total').first())
 
 @main.route('/set_cookie', methods=['GET'])
 def set_cookie():
@@ -82,6 +83,7 @@ def get_data(state_code):
     
 @main.route('/', methods=['GET', 'POST'])
 def index():
+    current_app.logger.info('index called')
     if not request.cookies.get('api_called'):
         db.session.query(Covid).delete()
         db.session.query(Timeseries).delete()
