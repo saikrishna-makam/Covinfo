@@ -186,7 +186,7 @@ state_select.onchange = function() {
             'state_code': state,
         }),
         contentType: 'application/json; charset=utf-8',
-        url: "{{ url_for('main.index') }}",
+        url: "{{ url_for('covinfo.index') }}",
         success: function(response) {
             full_data = JSON.parse(response.payload);
             labels1 = full_data['labels'];
